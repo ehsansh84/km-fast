@@ -1,0 +1,10 @@
+[project]
+name = "crossword-bknd"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "passlib>=1.7.4",
+    "python-jose>=3.5.0",
+]

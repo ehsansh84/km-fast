@@ -1,0 +1,100 @@
+config:
+  target: "http://localhost:8200"
+  phases:
+    - duration: 1
+      arrivalRate: 1
+  plugins:
+    expect: {}
+scenarios:
+  - flow:
+      - get:
+          name: Clean the database
+          url: "/debug/db_clean"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 200
+      - get:
+          name: Get token for Player 1
+          url: "/debug/test_token/test_player1"
+          headers:
+            Content-Type: "application/json"
+          expect:
+            - statusCode: 200
+          capture:
+            - header: authorization
+              regexp: "Bearer ([a-zA-Z0-9._-]+)"
+              as: token1
+            - json: "$.user_id"
+              as: player1_id
+      - log: "{{ token1 }}"
+      - post:
+          name: Create sample
+          url: "/sample/"
+          headers:
+            Content-Type: "application/json"
+            Authorization: "{{ token1 }}"
+          json:
+            name: "new_sample"
+          expect:
+            - statusCode: 201
+          capture:
+            - json: "$."
+              as: new_sample
+      # - get:
+      #     name: Get sample
+      #     url: "/sample/{{ new_sample.id }}"
+      #     headers:
+      #       Content-Type: "application/json"
+      #     expect:
+      #       - statusCode: 200
+      #     capture:
+      #       - json: "$."
+      #         as: new_sample
+      #     capture:
+      #       - json: "$."
+      #         as: new_user_profile
+      #     expect:
+      #       - statusCode: 200
+      #       - contentType: json
+      #       - hasProperty: id
+      #       - hasProperty: name
+      #       - equals:
+      #         - "{{ new_sample.name }}"
+      #         - new_sample
+      # - post:
+      #     name: Create another sample with the same name
+      #     url: "/sample"
+      #     headers:
+      #       Content-Type: "application/json"
+      #     json:
+      #       name: "new_sample"
+      #     expect:
+      #       - statusCode: 409
+      # - post:
+      #     name: Update sample
+      #     url: "/sample/{{ new_sample.id }}"
+      #     headers:
+      #       Content-Type: "application/json"
+      #     json:
+      #       name: "new_sample_updated"
+      #     expect:
+      #       - statusCode: 200
+      #     capture:
+      #       - json: "$.
+      #         as: updated_sample
+      # - get:
+      #     name: Get updated sample
+      #     url: "/sample/{{ updated_sample.id }}"
+      #     headers:
+      #       Content-Type: "application/json"
+      #     capture:
+      #       - json: "$."
+      #         as: google_new_user_profile
+      #     expect:
+      #       - statusCode: 200
+      #       - contentType: json
+      #       - hasProperty: id
+      #       - equals:
+      #         - "{{ updated_sample.name }}"
+      #         - new_sample_updated
